@@ -8,7 +8,7 @@ public class WowCraftingRobotApplication {
 
     // Params to change
     private static final double CRAFTING_TIME = 2; // sec, used time to craft 1 item
-    private static final int NB_SLOTS_MAX = 25; // sec, #empty slots
+    private static final int NB_SLOTS_MAX = 148; // sec, #empty slots
 
     // it depends where is your selling button
     private static final int CRAFT_ALL_POSITION_X_MIN = 721;
@@ -81,6 +81,7 @@ public class WowCraftingRobotApplication {
             System.out.println(new Date() + " - sleep time : " + sleepTime);
             TimeUnit.SECONDS.sleep(sleepTime);
             nbAdd+=1;
+            if(nbAdd >= 148) nbAdd = 148;
         } while (true);
     }
 
