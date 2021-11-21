@@ -8,7 +8,9 @@ public class WowCraftingRobotApplication {
 
     // Params to change
     private static final double CRAFTING_TIME = 2; // sec, used time to craft 1 item
-    private static final int NB_SLOTS_MAX = 148; // sec, #empty slots
+    private static final int NB_SLOTS = 50; // sec, #empty slots
+    private static final int NB_MAX_SLOTS = 148; // sec, #empty slots
+
 
     // it depends where is your selling button
     private static final int CRAFT_ALL_POSITION_X_MIN = 721;
@@ -21,8 +23,8 @@ public class WowCraftingRobotApplication {
     private static final int SELL_ALL_POSITION_Y_MAX = 631;
     private static final int TIME_MOUSE_CLICK_INTERVAL = 400;
     private static final int NB_ITEMS_SOLD_BY_SEC = 4; // sec
-    private static final double CRAFTING_WAIT = CRAFTING_TIME * NB_SLOTS_MAX; // sec
-    private static final int SELLING_WAIT = NB_SLOTS_MAX / NB_ITEMS_SOLD_BY_SEC; // sec
+    private static final double CRAFTING_WAIT = CRAFTING_TIME * NB_SLOTS; // sec
+    private static final int SELLING_WAIT = NB_SLOTS / NB_ITEMS_SOLD_BY_SEC; // sec
     private static final int RANDOM_WAIT = 10; // sec
     private static final int SMOOTH_MOVE_NB_STEPS = 1000; // sec
     private static final int SMOOTH_MOVE_MAX_SECONDS_TRAVEL = 3; // sec
@@ -81,7 +83,7 @@ public class WowCraftingRobotApplication {
             System.out.println(new Date() + " - sleep time : " + sleepTime);
             TimeUnit.SECONDS.sleep(sleepTime);
             nbAdd+=1;
-            if(nbAdd >= 148) nbAdd = 148;
+            if(nbAdd >= NB_MAX_SLOTS) nbAdd = NB_MAX_SLOTS;
         } while (true);
     }
 
