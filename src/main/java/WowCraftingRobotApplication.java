@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 public class WowCraftingRobotApplication {
 
     // Params to change
-    private static final double CRAFTING_TIME = 2; // sec, used time to craft 1 item
-    private static final int NB_SLOTS = 50; // sec, #empty slots
+    private static final double CRAFTING_TIME = 3; // sec, used time to craft 1 item
+    private static final int NB_SLOTS = 1; // sec, #empty slots
     private static final int NB_MAX_SLOTS = 148; // sec, #empty slots
 
 
@@ -31,7 +31,7 @@ public class WowCraftingRobotApplication {
 
     private int nbAdd = 0;
 
-    private void crafting(final Robot robot) throws InterruptedException {
+    private void crafting(final Robot robot, final double craftingTime, final int nbSlots) throws InterruptedException {
         // Crafting
         final var random = new Random();
         final var baseX = MouseInfo.getPointerInfo().getLocation().x;
@@ -47,11 +47,12 @@ public class WowCraftingRobotApplication {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
         mouseGlide(x, y, baseX, baseY, (int) (random.nextFloat() * SMOOTH_MOVE_MAX_SECONDS_TRAVEL), SMOOTH_MOVE_NB_STEPS);
         System.out.println(new Date() + " - Start crafting...");
-        TimeUnit.SECONDS.sleep((long) (CRAFTING_WAIT + SMOOTH_MOVE_MAX_SECONDS_TRAVEL + (nbAdd * CRAFTING_TIME)));
+        final double craftingWait = craftingTime * nbSlots;
+        TimeUnit.SECONDS.sleep((long) (craftingWait + SMOOTH_MOVE_MAX_SECONDS_TRAVEL + (nbAdd * craftingTime)));
         System.out.println(new Date() + " - Crafting DONE");
     }
 
-    private void selling(final Robot robot) throws InterruptedException {
+    private void selling(final Robot robot, final int nbSlots) throws InterruptedException {
         // Selling
         final var random = new Random();
         final var baseX = MouseInfo.getPointerInfo().getLocation().x;
@@ -64,26 +65,32 @@ public class WowCraftingRobotApplication {
         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
         robot.delay(mouseIntervalClick);
 
+        final int sellingWait = nbSlots / NB_ITEMS_SOLD_BY_SEC;
+
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
         mouseGlide(x, y, baseX, baseY, (int) (random.nextFloat() * SMOOTH_MOVE_MAX_SECONDS_TRAVEL), SMOOTH_MOVE_NB_STEPS);
         System.out.println(new Date() + " - Start selling...");
-        TimeUnit.SECONDS.sleep(SELLING_WAIT + SMOOTH_MOVE_MAX_SECONDS_TRAVEL + nbAdd / NB_ITEMS_SOLD_BY_SEC);
+        TimeUnit.SECONDS.sleep(sellingWait + SMOOTH_MOVE_MAX_SECONDS_TRAVEL + nbAdd / NB_ITEMS_SOLD_BY_SEC);
         System.out.println(new Date() + " - Selling DONE");
     }
 
-    public void start() throws AWTException, InterruptedException {
+    public void start(Double craftingTime, Integer nbSlots, Integer nbMaxAvailableSlots) throws AWTException, InterruptedException {
         final var random = new Random();
+        final double crafting = craftingTime != null ? craftingTime : CRAFTING_TIME;
+        final int minSlots = nbSlots != null ? nbSlots : NB_SLOTS;
+        final int nbMaxSlots = nbMaxAvailableSlots != null ? nbMaxAvailableSlots : NB_MAX_SLOTS;
+
         do {
-            this.crafting(new Robot());
+            this.crafting(new Robot(), crafting, minSlots);
             var sleepTime = random.nextInt(RANDOM_WAIT);
             System.out.println(new Date() + " - sleep time : " + sleepTime);
 
-            this.selling(new Robot());
+            this.selling(new Robot(), nbSlots);
             sleepTime = random.nextInt(RANDOM_WAIT);
             System.out.println(new Date() + " - sleep time : " + sleepTime);
             TimeUnit.SECONDS.sleep(sleepTime);
-            nbAdd+=1;
-            if(nbAdd >= NB_MAX_SLOTS) nbAdd = NB_MAX_SLOTS;
+            nbAdd += 1;
+            if (nbAdd >= nbMaxSlots) nbAdd = nbMaxSlots;
         } while (true);
     }
 
@@ -109,8 +116,24 @@ public class WowCraftingRobotApplication {
     }
 
     public static void main(String[] args) throws AWTException, InterruptedException {
-        final var robot = new WowCraftingRobotApplication();
-        robot.start();
+        if (args.length != 3) {
+            System.out.println("Il faut 3 paramètres séparés par un espace pour lancer l'application :");
+            System.out.println("1) le temps de craft en second");
+            System.out.println("2) Nb d'espaces libres");
+            System.out.println("3) Nb max d'espaces libres");
+            System.out.println("exemple : java -jar WowCraftingRobot-1.0.jar 2 1 148");
+        }
+
+        try {
+            final Double craftingTime = Double.parseDouble(args[0]);
+            final Integer nbSlots = Integer.parseInt(args[1]);
+            final Integer nbMaxSlots = Integer.parseInt(args[2]);
+
+            final var robot = new WowCraftingRobotApplication();
+            robot.start(craftingTime, nbSlots, nbMaxSlots);
 //        robot.showPointerInfo();
+        } catch (NumberFormatException nfe) {
+            System.out.println("Erreur durant l'application" + nfe.getLocalizedMessage());
+        }
     }
 }
